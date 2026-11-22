@@ -14,7 +14,6 @@ jobs:
 
       - name: Extract project
         run: |
-          unzip -o LITVIN_CLICKER_GitHub.zip -d .
           unzip -o LITVIN_CLICKER_UPDATE.zip -d .
 
       - name: Setup Java
