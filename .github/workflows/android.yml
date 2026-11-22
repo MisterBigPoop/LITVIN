@@ -8,13 +8,27 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Extract project
         run: |
+          unzip -o LITVIN_CLICKER_GitHub.zip -d .
           unzip -o LITVIN_CLICKER_UPDATE.zip -d .
+
+      - name: Find project folder
+        run: |
+          FILE=$(find . -name settings.gradle.kts -print -quit)
+          if [ -z "$FILE" ]; then
+            echo "ERROR: settings.gradle.kts not found"
+            find . -maxdepth 4 -type f
+            exit 1
+          fi
+          DIR=$(dirname "$FILE")
+          echo "PROJECT_DIR=$DIR" >> $GITHUB_ENV
+          echo "Project found: $DIR"
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -31,10 +45,12 @@ jobs:
           gradle-version: '8.9'
 
       - name: Build APK
-        run: gradle --no-daemon assembleDebug
+        run: |
+          cd "$PROJECT_DIR"
+          gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: LITVIN-CLICKER-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
